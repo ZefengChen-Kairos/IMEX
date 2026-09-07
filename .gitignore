@@ -1,0 +1,7 @@
+build/
+*.o
+*.d
+output/
+*.dat
+*.vtk
+.DS_Store
