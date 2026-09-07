@@ -1,17 +1,34 @@
 # Semi-implicit IMEX MHD solver with constrained transport
 
-A 2D finite-volume solver for the ideal compressible MHD equations, using an
-IMEX (implicit-explicit) time discretisation: the fast magnetosonic and Alfvén
-acoustics are treated implicitly through matrix-free subsystems solved by GMRES,
-while the material transport is treated explicitly. The time step is therefore
-restricted by the material velocity rather than by the fast magnetosonic speed,
-which is what makes the scheme usable in the low-Mach and low-Alfvén-number
-regime where an explicit scheme becomes prohibitively expensive.
+Reference implementation of the scheme described in:
+
+> Zefeng Chen, Riccardo Demattè, Walter Boscheri, Stephen Millmore,
+> *A Structure- and Pressure-Positivity-Preserving Semi-implicit IMEX Finite
+> Volume Scheme for Ideal MHD at All Acoustic Mach and Alfvén Mach Numbers with
+> Generic Equation of State*, arXiv:2608.15837 (2026).
+> https://arxiv.org/abs/2608.15837
+
+A 2D finite-volume solver for the ideal compressible MHD equations. The system
+is split into three sub-systems by characteristic wave scale: an advective part
+for hydrodynamic transport, a magnetic part for the velocity-field coupling, and
+a pressure part for the pressure-velocity coupling. The nonlinear advective
+terms are integrated explicitly; the other two sub-systems are implicit and are
+solved matrix-free with GMRES. The time step is therefore restricted by the
+material velocity rather than by the fast magnetosonic speed, so the scheme
+stays efficient in gas-pressure dominated, magnetic-pressure dominated and
+incompressible limits alike.
+
+Pressure positivity is enforced through a nested-Newton solve of the pressure
+sub-system, in which the diagonal term is replaced by a piecewise-linear
+approximation below a pressure floor. The equation of state enters only through
+that diagonal term and the sound speed, so ideal-gas and Redlich-Kwong closures
+share the same machinery; the ideal-gas path is unchanged from the linear
+formulation.
 
 The divergence constraint on the magnetic field is handled by constrained
 transport, with several variants available (staggered, unstaggered via the
 vector potential, and an EMF-consistent staggered variant built from the fluxes
-the implicit magnetic subsystem actually uses).
+the implicit magnetic sub-system actually uses).
 
 ## Building
 
@@ -114,3 +131,18 @@ declaration and a separate definition.
   in the definitions to keep the shared signature these functions are called
   through.
 - The extensive inline commentary is in Chinese.
+
+## Citing
+
+```bibtex
+@article{chen2026imexmhd,
+  title   = {A Structure- and Pressure-Positivity-Preserving Semi-implicit IMEX
+             Finite Volume Scheme for Ideal MHD at All Acoustic Mach and
+             Alfv\'en Mach Numbers with Generic Equation of State},
+  author  = {Chen, Zefeng and Dematt\`e, Riccardo and Boscheri, Walter
+             and Millmore, Stephen},
+  journal = {arXiv preprint arXiv:2608.15837},
+  year    = {2026},
+  url     = {https://arxiv.org/abs/2608.15837}
+}
+```
